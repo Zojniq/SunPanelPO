@@ -1,0 +1,338 @@
+/* ── layout.css — Struttura pagina, sidebar, toolbar, canvas area ── */
+
+*, *::before, *::after {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+}
+
+body {
+ font-family: var(--font-main);
+ background: var(--bg-primary);
+ color: var(--text-primary);
+ overflow: hidden;
+ /* Prevent iOS rubber-band scroll */
+ position: fixed;
+ width: 100%;
+ height: 100%;
+ font-size: var(--fs-base);
+ line-height: 1.5;
+ -webkit-font-smoothing: antialiased;
+ -moz-osx-font-smoothing: grayscale;
+ /* Prevent iOS text size adjustment on rotate */
+ -webkit-text-size-adjust: 100%;
+}
+
+.container {
+ display: flex;
+ /* Use dvh so Safari chrome is excluded */
+ height: 100vh;
+ height: 100dvh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 300px;
+  min-width: 300px;
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── App header ── */
+.app-header {
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.app-logo {
+  width: 26px; height: 26px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.app-logo svg { color: #fff; }
+.app-title { flex: 1; min-width: 0; }
+.app-title h1 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app-title p {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 400;
+  line-height: 1.2;
+}
+.app-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+/* ── Project bar ── */
+.project-bar {
+  display: flex;
+  gap: 4px;
+  padding: 7px 16px;
+  border-bottom: 1px solid var(--border-default);
+  background: var(--bg-secondary);
+}
+
+/* ── Content ── */
+.content { padding: 0; flex: 1; overflow-y: auto; overflow-x: hidden; }
+
+/* ── Sezione ── */
+.section {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-default);
+}
+.section:last-child { border-bottom: none; }
+.section.disabled { opacity: 0.3; pointer-events: none; }
+
+/* Titolo sezione — numero grande + label leggibile */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+.section:not(.disabled) .step-num {
+  background: var(--text-primary);
+  color: var(--text-inverse);
+  border-color: var(--text-primary);
+}
+.section-title-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0;
+}
+
+/* ── Stats ── */
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.stat {
+  padding: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+}
+.stat-label {
+  font-size: 9px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 3px;
+  font-weight: 700;
+}
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/* ── Toolbar — pill design ── */
+.toolbar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 20;
+  flex-wrap: wrap;
+  max-width: calc(100vw - 320px);
+}
+
+/* Gruppo: pill con sfondo */
+.tb-group {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE — breakpoints precisi per ogni dispositivo
+   Desktop     > 1024px  : layout originale invariato
+   iPad Pro    ≤ 1024px  : affiancato, sidebar 260px
+   iPad mini   ≤  768px  : affiancato, sidebar 240px
+   iPhone land.≤  900px, max-height 500px : affiancato, sidebar 220px
+   iPhone port.≤  480px  : canvas sopra, sidebar strip sotto
+   NOTA: non toccare nulla sopra i 1024px (Chrome desktop)
+═══════════════════════════════════════════════════════ */
+
+/* ── iPad Pro / large tablet portrait (≤1024px, >768px) ── */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .container { height: 100dvh; }
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Larger touch targets */
+  .btn { padding: 9px 12px; }
+  .field-input { padding: 9px 10px; font-size: 15px; }
+  .field-label { font-size: 11px; }
+  .section { padding: 13px 14px; }
+  .modal-content { max-width: 90vw; }
+}
+
+/* ── iPad mini portrait / generic tablet (≤768px, >480px) ── */
+@media (max-width: 768px) and (min-width: 481px) {
+  .container { flex-direction: row; height: 100dvh; }
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    height: 100%;
+    max-height: none;
+    border-right: 1px solid var(--border-default);
+    border-bottom: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  .canvas-container { flex: 1; height: 100%; }
+  .toolbar { flex-wrap: nowrap; max-width: calc(100vw - 260px); gap: 3px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tb-btn { padding: 6px 9px; font-size: var(--fs-xs); }
+  .tb-btn span { display: none; }
+  .tb-btn svg { display: block; }
+  #tbgSnap { display: none !important; }
+  /* Larger touch targets for tablet */
+  .btn { padding: 8px 12px; }
+  .field-input { padding: 8px 9px; }
+  .section { padding: 11px 14px; }
+  .modal-content { padding: 20px; max-width: 95vw; }
+  /* Hide toggle button */
+  #mob-panel-toggle { display: none !important; }
+}
+
+/* ── iPhone landscape (≤900px wide, ≤500px tall) ── */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  .container { flex-direction: row; height: 100dvh; }
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    max-height: none;
+    height: 100%;
+    border-right: 1px solid var(--border-default);
+    border-bottom: none;
+    border-top: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+  .canvas-container {
+    flex: 1;
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  #mob-panel-toggle { display: none !important; }
+  .section { padding: 6px 10px; }
+  .app-title p { display: none; }
+  .project-bar { padding: 4px 10px; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .section-title { margin-bottom: 6px; }
+}
+
+/* ── iPhone portrait (≤480px) ── */
+@media (max-width: 480px) {
+  .container {
+    flex-direction: column-reverse;
+    height: 100dvh;
+  }
+  /* Canvas: fills all space above sidebar */
+  .canvas-container {
+    flex: 1;
+    min-height: 0;
+    touch-action: none;
+  }
+  /* Sidebar: compact strip at bottom */
+  .sidebar {
+    width: 100%;
+    min-width: 0;
+    flex-shrink: 0;
+    height: 170px;
+    max-height: none;
+    border-right: none;
+    border-top: 1px solid var(--border-default);
+    border-bottom: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .sidebar.mob-expanded { height: 60vh; }
+  /* App header compact */
+  .app-header { padding: 6px 12px; }
+  .app-title p { display: none; }
+  /* Project bar */
+  .project-bar { padding: 4px 12px; gap: 3px; }
+  .proj-btn { font-size: 10px; padding: 4px 2px; }
+  /* Sections */
+  .section { padding: 8px 12px; }
+  .section-title { margin-bottom: 7px; }
+  .section.disabled { padding: 5px 12px; }
+  #tbgSnap { display: none !important; }
+  .stats { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .stat-value { font-size: 16px; }
+  .toolbar {
+    left: max(12px, env(safe-area-inset-left, 12px));
+    max-width: calc(100vw - 80px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+  }
+  /* Toggle button */
+  #mob-panel-toggle {
+    display: flex;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 50;
+    width: 48px;
+    height: 48px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-default);
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+    font-size: 20px;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Sidebar scroll migliorato */
+.sidebar { scroll-behavior: smooth; }
+.content { padding-bottom: 40px; }

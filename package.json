@@ -1,0 +1,50 @@
+{
+  "name": "solar-designer-pro",
+  "version": "1.0.0",
+  "description": "Solar Designer Pro - App desktop",
+  "main": "main.js",
+  "scripts": {
+    "start": "npm run build:bundle && electron .",
+    "dist": "npm run build:bundle && electron-builder --win --x64",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "build:bundle": "node build/bundle.js"
+  },
+  "build": {
+    "appId": "com.solardesigner.pro",
+    "productName": "Solar Designer Pro",
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico"
+    },
+    "asar": true,
+    "asarUnpack": [
+      "vendor/pdfjs/pdf.worker.min.js"
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "solar-designer-v89.html",
+      "css",
+      "js",
+      "data",
+      "vendor",
+      "assets",
+      "dist/app.js"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.0.0",
+    "eslint": "^10.3.0",
+    "vitest": "^4.1.6"
+  }
+}

@@ -38,6 +38,7 @@ Desktop.ini
 .project
 .classpath
 .settings/
+.claude/
 
 # Electron-builder cache
 .cache/

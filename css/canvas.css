@@ -1,0 +1,145 @@
+/* ── canvas.css — Stili specifici canvas e overlay ── */
+
+.canvas-container {
+ flex: 1;
+ position: relative;
+ background: var(--bg-canvas);
+ overflow: hidden;
+ /* Prevent iOS from intercepting touch events on the canvas */
+ touch-action: none;
+}
+.canvas-container.drag-over {
+  outline: 3px dashed var(--accent);
+  outline-offset: -3px;
+  background: rgba(13,150,104,0.08);
+}
+
+#canvas {
+ position: absolute;
+ cursor: default;
+ top: 50%;
+ left: 50%;
+ transform: translate(-50%, -50%);
+ /* Critical: tell browser we handle all touch ourselves */
+ touch-action: none;
+ -webkit-tap-highlight-color: transparent;
+ -webkit-user-select: none;
+ user-select: none;
+}
+
+/* Singolo bottone dentro la pill */
+.tb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 11px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border-default);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  font-family: var(--font-main);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  white-space: nowrap;
+  line-height: 1;
+}
+.tb-btn:last-child { border-right: none; }
+.tb-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.tb-btn.active {
+  background: var(--text-primary);
+  color: var(--text-inverse);
+}
+.tb-btn.active:hover { background: var(--text-primary); opacity: .88; }
+.tb-btn.snap-on {
+  background: var(--accent);
+  color: #fff;
+}
+.tb-btn.snap-on:hover { background: var(--accent-hover); color: #fff; }
+
+/* Icona SVG inline dentro btn */
+.tb-btn svg { flex-shrink: 0; }
+
+/* Input snap griglia dentro pill */
+.tb-snap-input {
+  width: 40px;
+  padding: 4px 4px;
+  font-size: var(--fs-xs);
+  font-family: var(--font-main);
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: center;
+  outline: none;
+}
+.tb-snap-input:focus { background: var(--bg-hover); border-radius: 3px; }
+.tb-snap-label { font-size: var(--fs-xs); color: var(--text-tertiary); padding-right: 6px; }
+
+/* Badge stringhe */
+.tb-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+
+.compass {
+ position: absolute;
+ top: 12px;
+ right: 12px;
+ width: 44px;
+ height: 44px;
+ background: var(--bg-primary);
+ border: 1px solid var(--border-default);
+ border-radius: 50%;
+ display: none;
+ align-items: center;
+ justify-content: center;
+ font-size: var(--fs-base);
+ font-weight: 600;
+ box-shadow: var(--shadow-md);
+ z-index: 20;
+}
+
+.compass.visible {
+ display: flex;
+}
+
+.compass::before {
+ content: 'N';
+ position: absolute;
+ top: 6px;
+ font-size: 10px;
+ color: var(--danger);
+}
+
+.welcome {
+ position: absolute;
+ top: 50%;
+ left: 50%;
+ transform: translate(-50%, -50%);
+ text-align: center;
+ color: var(--text-muted);
+ z-index: 5;
+}
+
+.welcome.hidden {
+ display: none;
+}
+
+.welcome h2 {
+ font-size: var(--fs-xl);
+ font-weight: 600;
+ color: var(--text-primary);
+ margin-bottom: 8px;
+}
+
+.welcome p {
+ font-size: var(--fs-base);
+}

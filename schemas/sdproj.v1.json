@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://solardesignerpro.local/schemas/sdproj.v1.json",
+  "title": "Solar Designer Pro project file — sdproj/1",
+  "description": "On-disk project file for Solar Designer Pro. Introduced in AP-10 / PR-26. This schema is documentation-only and is NOT enforced at runtime; the canonical builder is js/storage.js → buildSdprojDocument().",
+  "type": "object",
+  "required": ["version", "metadata", "project"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "sdproj/1",
+      "description": "Canonical format marker. Readers must inspect this first."
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["appVersion", "normsRevision", "createdAt", "modifiedAt", "projectName"],
+      "description": "Traceability and provenance information.",
+      "properties": {
+        "appVersion": {
+          "type": "string",
+          "description": "Semver of Solar Designer Pro at save time.",
+          "examples": ["1.0.0"]
+        },
+        "normsRevision": {
+          "type": "string",
+          "description": "Normative edition baseline used for sizing / validation.",
+          "examples": ["CEI 0-21:2022"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC. First save timestamp in the current session."
+        },
+        "modifiedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC. Updated on every save."
+        },
+        "projectName": {
+          "type": "string",
+          "description": "Human-readable project name. Derived from project.cartiglio.committente if non-empty, else 'progetto-fv'."
+        }
+      },
+      "additionalProperties": true
+    },
+    "project": {
+      "type": "object",
+      "description": "Engineering payload. Mirrors the runtime state shape produced by _buildFullState(); the legacy top-level 'version' field is stripped here.",
+      "required": [
+        "scale",
+        "panelOrientation",
+        "walkwaysEnabled",
+        "installableAreas",
+        "exclusionAreas",
+        "technicalObjects",
+        "panels",
+        "strings",
+        "calPts",
+        "inverterList",
+        "moduleParams",
+        "cartiglio"
+      ],
+      "properties": {
+        "scale":            { "type": "number" },
+        "panelOrientation": { "type": "string", "enum": ["auto", "portrait", "landscape"] },
+        "walkwaysEnabled":  { "type": "boolean" },
+        "installableAreas": { "type": "array",  "items": { "type": "object" } },
+        "exclusionAreas":   { "type": "array",  "items": { "type": "object" } },
+        "technicalObjects": { "type": "array",  "items": { "type": "object" } },
+        "panels":           { "type": "array",  "items": { "type": "object" } },
+        "strings":          { "type": "array",  "items": { "type": "object" } },
+        "calPts":           { "type": "array",  "items": { "type": "object" } },
+        "inverterList":     { "type": "array",  "items": { "type": "object" } },
+        "moduleParams":     { "type": "object" },
+        "cartiglio":        { "type": "object" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

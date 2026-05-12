@@ -1,0 +1,79 @@
+# ── CI — Solar Designer Pro ─────────────────────────────────────────────
+# AP-13 / T2.8.1 (lint + test) + T2.8.2 (build dry-run) + T2.8.3 (artifact
+# upload of unpacked build output).
+
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  build:
+    name: Build (dry-run, --dir)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build renderer bundle
+        run: npm run build:bundle
+
+      - name: Electron-builder dry-run (unpacked dir only, no installer)
+        run: npx electron-builder --dir
+
+      - name: Upload unpacked build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdp-build-dir
+          path: dist/linux-unpacked/
+          if-no-files-found: error
+          retention-days: 7
