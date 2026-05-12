@@ -2,7 +2,7 @@
 node_modules/
 dist/
 out/
-build/
+build/*
 !build/bundle.js
 
 # Logs & runtime
