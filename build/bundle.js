@@ -27,6 +27,7 @@ const SOURCES = [
   'js/lib/sizing.js',
   'js/cables.js',
   'js/cables/sld-render.js',
+  'js/cables/sld-export.js',
   'js/enhancements.js',
   'js/ui.js',
 ];
