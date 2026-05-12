@@ -30,6 +30,7 @@ const SOURCES = [
   'js/cables/sld-export.js',
   'js/cables/verifiche.js',
   'js/enhancements.js',
+  'js/ui/utils.js',
   'js/ui.js',
 ];
 

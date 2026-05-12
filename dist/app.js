@@ -8307,9 +8307,13 @@ function _drawAreaPreviewOverlay() {
 }
 
 
-// ── js/ui.js ──
-// ── ui.js — Interfaccia utente, eventi, inizializzazione ──
-
+// ── js/ui/utils.js ──
+// ── js/ui/utils.js — UI utilities + DOM cache + crash-log bridge ──
+// Extracted from ui.js in AP-16a. Toast notifications, custom confirm/
+// prompt dialogs, theme toggle, DOM cache populator, section-enable
+// helper, and the renderer error bridge to the preload crash channel.
+// Calling surface unchanged — all symbols remain available through
+// bundle-scope globals.
 'use strict';
 
 // ── Global error handlers ──────────────────────────────────────────────────────
@@ -8481,6 +8485,13 @@ function initDOMCache() {
 function enable(id) {
   document.getElementById(id).classList.remove('disabled');
 }
+
+
+// ── js/ui.js ──
+// ── ui.js — Interfaccia utente, eventi, inizializzazione ──
+
+'use strict';
+
 
 // ── Inizializzazione ──────────────────────────────────────────────────────────
 
