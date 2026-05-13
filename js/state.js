@@ -21,8 +21,11 @@ let middleDrag    = false;
 let calPts = [];  // [pt1, pt2] punti di calibrazione (world coords)
 
 // ── Dati progetto ────────────────────────────────────────────────────
-let installableAreas = [];   // [{points, type, orientation}]
-let exclusionAreas   = [];   // [{points}]
+// installableAreas / exclusionAreas — ownership migrated to store.js (AP-17d).
+// Bare identifiers remain available as globalThis getter/setter bridges
+// defined in store.js. Array-level writes (push/splice/reassignment) should
+// go through setStoreSlice; in-place element property mutations are still
+// permitted until a later AP-17 step hardens element access.
 /** Ostacoli puntuali: {type, x, y, sizePx, sizem, bufferM, label, ang}
  *  type: 'chimney' | 'antenna' | 'hvac' | 'skylight' | 'exhaust' */
 let technicalObjects = [];

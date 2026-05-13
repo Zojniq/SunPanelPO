@@ -19,8 +19,8 @@
 
 let _state = {
   inverterList: [],
-  installableAreas: null,
-  exclusionAreas: null,
+  installableAreas: [],
+  exclusionAreas: [],
   technicalObjects: null,
   panels: null,
   strings: null,
@@ -76,3 +76,28 @@ try {
     set(v) { setStoreSlice('inverterList', v); }
   });
 } catch (_e) { /* property already defined or environment forbids; ignore */ }
+
+// ── AP-17d — `installableAreas` / `exclusionAreas` compatibility bridges ─────
+// Temporary AP-17d bridges. Ownership of both polygon slices lives in the
+// store; bare identifiers route reads to `_state.<slice>` and assignments
+// to `setStoreSlice(<slice>, …)`. Array-level writes (push/splice) should
+// be replaced with explicit setStoreSlice calls. In-place element property
+// mutations (e.g. `installableAreas[i].orientation = …`) still work
+// transparently through the getter and will be addressed in a later step.
+try {
+  Object.defineProperty(globalThis, 'installableAreas', {
+    configurable: true,
+    enumerable: true,
+    get() { return _state.installableAreas; },
+    set(v) { setStoreSlice('installableAreas', v); }
+  });
+} catch (_e) { /* ignore */ }
+
+try {
+  Object.defineProperty(globalThis, 'exclusionAreas', {
+    configurable: true,
+    enumerable: true,
+    get() { return _state.exclusionAreas; },
+    set(v) { setStoreSlice('exclusionAreas', v); }
+  });
+} catch (_e) { /* ignore */ }

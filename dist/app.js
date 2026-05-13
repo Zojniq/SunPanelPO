@@ -172,8 +172,11 @@ let middleDrag    = false;
 let calPts = [];  // [pt1, pt2] punti di calibrazione (world coords)
 
 // ── Dati progetto ────────────────────────────────────────────────────
-let installableAreas = [];   // [{points, type, orientation}]
-let exclusionAreas   = [];   // [{points}]
+// installableAreas / exclusionAreas — ownership migrated to store.js (AP-17d).
+// Bare identifiers remain available as globalThis getter/setter bridges
+// defined in store.js. Array-level writes (push/splice/reassignment) should
+// go through setStoreSlice; in-place element property mutations are still
+// permitted until a later AP-17 step hardens element access.
 /** Ostacoli puntuali: {type, x, y, sizePx, sizem, bufferM, label, ang}
  *  type: 'chimney' | 'antenna' | 'hvac' | 'skylight' | 'exhaust' */
 let technicalObjects = [];
@@ -348,8 +351,8 @@ const MODULE_LIB_KEY = 'sdp_module_library';
 
 let _state = {
   inverterList: [],
-  installableAreas: null,
-  exclusionAreas: null,
+  installableAreas: [],
+  exclusionAreas: [],
   technicalObjects: null,
   panels: null,
   strings: null,
@@ -405,6 +408,31 @@ try {
     set(v) { setStoreSlice('inverterList', v); }
   });
 } catch (_e) { /* property already defined or environment forbids; ignore */ }
+
+// ── AP-17d — `installableAreas` / `exclusionAreas` compatibility bridges ─────
+// Temporary AP-17d bridges. Ownership of both polygon slices lives in the
+// store; bare identifiers route reads to `_state.<slice>` and assignments
+// to `setStoreSlice(<slice>, …)`. Array-level writes (push/splice) should
+// be replaced with explicit setStoreSlice calls. In-place element property
+// mutations (e.g. `installableAreas[i].orientation = …`) still work
+// transparently through the getter and will be addressed in a later step.
+try {
+  Object.defineProperty(globalThis, 'installableAreas', {
+    configurable: true,
+    enumerable: true,
+    get() { return _state.installableAreas; },
+    set(v) { setStoreSlice('installableAreas', v); }
+  });
+} catch (_e) { /* ignore */ }
+
+try {
+  Object.defineProperty(globalThis, 'exclusionAreas', {
+    configurable: true,
+    enumerable: true,
+    get() { return _state.exclusionAreas; },
+    set(v) { setStoreSlice('exclusionAreas', v); }
+  });
+} catch (_e) { /* ignore */ }
 
 
 // ── js/dom.js ──
@@ -8948,7 +8976,8 @@ function delInstallableArea(i) {
     invalidateLayoutCache();
     const hadStrings = strings.length;
     panels = panels.filter(p => p.areaIdx !== i);
-    installableAreas.splice(i, 1);
+    // AP-17d: route write through store.
+    globalThis.setStoreSlice('installableAreas', installableAreas.filter((_, idx) => idx !== i));
     panels.forEach(p => { if (p.areaIdx > i) p.areaIdx--; });
     selectedPanels = new Set();
     strings = [];
@@ -8967,7 +8996,8 @@ function delExclusionArea(i) {
   _sdpConfirm('Eliminare area ostacolo?', () => {
     snapshot();
     invalidateLayoutCache();
-    exclusionAreas.splice(i, 1);
+    // AP-17d: route write through store.
+    globalThis.setStoreSlice('exclusionAreas', exclusionAreas.filter((_, idx) => idx !== i));
     updateAreaLists(); draw();
   });
 }
@@ -9457,10 +9487,11 @@ function handleClick(e) {
   // ── Modalità incolla area non installabile ────────────────────
   if (_copyExclMode && _copyExclPts) {
     snapshot();
-    exclusionAreas.push({
+    // AP-17d: route write through store.
+    globalThis.setStoreSlice('exclusionAreas', exclusionAreas.concat([{
       points: _copyExclPts.map(pt=>({x:p.x+pt.x, y:p.y+pt.y})),
       type: 'exclusion'
-    });
+    }]));
     invalidateLayoutCache();
     _copyExclMode = false;
     _copyExclPts  = null;
@@ -9646,7 +9677,8 @@ function completeArea() {
   invalidateLayoutCache();
   if (curAreaType === 'installable') {
     newArea.exposure = computeAreaExposure(newArea.points);
-    installableAreas.push(newArea);
+    // AP-17d: route write through store.
+    globalThis.setStoreSlice('installableAreas', installableAreas.concat([newArea]));
     curPts = []; _orthoRefAngle = null; orthoPreviewPt = null;
     mode = 'none'; curAreaType = null;
     DOM.areaBtn.classList.remove('active');
@@ -9661,7 +9693,8 @@ function completeArea() {
     _scheduleAreaPreview();
     requestDraw();
   } else {
-    exclusionAreas.push(newArea);
+    // AP-17d: route write through store.
+    globalThis.setStoreSlice('exclusionAreas', exclusionAreas.concat([newArea]));
     curPts = []; _orthoRefAngle = null; orthoPreviewPt = null;
     mode = 'none'; curAreaType = null;
     DOM.exclusionBtn.classList.remove('active');

@@ -82,10 +82,11 @@ function handleClick(e) {
   // ── Modalità incolla area non installabile ────────────────────
   if (_copyExclMode && _copyExclPts) {
     snapshot();
-    exclusionAreas.push({
+    // AP-17d: route write through store.
+    globalThis.setStoreSlice('exclusionAreas', exclusionAreas.concat([{
       points: _copyExclPts.map(pt=>({x:p.x+pt.x, y:p.y+pt.y})),
       type: 'exclusion'
-    });
+    }]));
     invalidateLayoutCache();
     _copyExclMode = false;
     _copyExclPts  = null;
@@ -271,7 +272,8 @@ function completeArea() {
   invalidateLayoutCache();
   if (curAreaType === 'installable') {
     newArea.exposure = computeAreaExposure(newArea.points);
-    installableAreas.push(newArea);
+    // AP-17d: route write through store.
+    globalThis.setStoreSlice('installableAreas', installableAreas.concat([newArea]));
     curPts = []; _orthoRefAngle = null; orthoPreviewPt = null;
     mode = 'none'; curAreaType = null;
     DOM.areaBtn.classList.remove('active');
@@ -286,7 +288,8 @@ function completeArea() {
     _scheduleAreaPreview();
     requestDraw();
   } else {
-    exclusionAreas.push(newArea);
+    // AP-17d: route write through store.
+    globalThis.setStoreSlice('exclusionAreas', exclusionAreas.concat([newArea]));
     curPts = []; _orthoRefAngle = null; orthoPreviewPt = null;
     mode = 'none'; curAreaType = null;
     DOM.exclusionBtn.classList.remove('active');

@@ -257,7 +257,8 @@ function delInstallableArea(i) {
     invalidateLayoutCache();
     const hadStrings = strings.length;
     panels = panels.filter(p => p.areaIdx !== i);
-    installableAreas.splice(i, 1);
+    // AP-17d: route write through store.
+    globalThis.setStoreSlice('installableAreas', installableAreas.filter((_, idx) => idx !== i));
     panels.forEach(p => { if (p.areaIdx > i) p.areaIdx--; });
     selectedPanels = new Set();
     strings = [];
@@ -276,7 +277,8 @@ function delExclusionArea(i) {
   _sdpConfirm('Eliminare area ostacolo?', () => {
     snapshot();
     invalidateLayoutCache();
-    exclusionAreas.splice(i, 1);
+    // AP-17d: route write through store.
+    globalThis.setStoreSlice('exclusionAreas', exclusionAreas.filter((_, idx) => idx !== i));
     updateAreaLists(); draw();
   });
 }
