@@ -240,7 +240,11 @@ let metricSnapM       = 0;        // 0 = off, altrimenti passo in metri
 
 // ── Parco inverter ───────────────────────────────────────────────────
 /** [{key, brand, model, pac, mppt, vMin, vMax, iMax, vocMax, ac, qty}] */
-let _inverterList = [];
+// _inverterList — ownership migrated to store.js (AP-17c). The identifier
+// remains available as a globalThis getter/setter bridge defined there;
+// reads resolve to getStoreSlice('inverterList'), assignments route to
+// setStoreSlice('inverterList', …). In-place array mutations are
+// discouraged — use setStoreSlice with a rebuilt array.
 
 // ── Modulo selezionato dalla libreria ────────────────────────────────
 let _modulePresetKey = null;  // indice in MODULE_PRESETS, o null se personalizzato
@@ -343,7 +347,7 @@ const MODULE_LIB_KEY = 'sdp_module_library';
 'use strict';
 
 let _state = {
-  inverterList: null,
+  inverterList: [],
   installableAreas: null,
   exclusionAreas: null,
   technicalObjects: null,
@@ -387,6 +391,20 @@ function setStoreSlice(key, value) {
   patch[key] = value;
   return setState(patch);
 }
+
+// ── AP-17c — `_inverterList` compatibility bridge ────────────────────────────
+// `_inverterList` ownership is migrated to store.inverterList. Legacy callers
+// still reference the bare identifier; the bridge below resolves reads to the
+// current store slice and routes assignments through setStoreSlice. New write
+// paths should call setStoreSlice('inverterList', nextList) directly.
+try {
+  Object.defineProperty(globalThis, '_inverterList', {
+    configurable: true,
+    enumerable: true,
+    get() { return _state.inverterList; },
+    set(v) { setStoreSlice('inverterList', v); }
+  });
+} catch (_e) { /* property already defined or environment forbids; ignore */ }
 
 
 // ── js/dom.js ──
@@ -5845,10 +5863,17 @@ function addInverterToList() {
   if (!p) return;
   const qty = Math.max(1, parseInt(qtyEl.value) || 1);
 
-  // Se esiste già lo stesso modello, incrementa la quantità
-  const existing = _inverterList.find(i => i.key === sel.value);
-  if (existing) { existing.qty += qty; }
-  else { _inverterList.push({ key: sel.value, ...p, qty }); }
+  // AP-17c: route writes through store. Rebuild list so subscribers see a
+  // fresh reference and avoid in-place mutation as a side channel.
+  const cur = globalThis.getStoreSlice('inverterList') || [];
+  const existing = cur.find(i => i.key === sel.value);
+  let next;
+  if (existing) {
+    next = cur.map(i => i === existing ? Object.assign({}, i, { qty: i.qty + qty }) : i);
+  } else {
+    next = cur.concat([{ key: sel.value, ...p, qty }]);
+  }
+  globalThis.setStoreSlice('inverterList', next);
 
   sel.value = '';
   qtyEl.value = 1;
@@ -5856,7 +5881,10 @@ function addInverterToList() {
 }
 
 function removeInverterFromList(idx) {
-  _inverterList.splice(idx, 1);
+  // AP-17c: route writes through store.
+  const cur = globalThis.getStoreSlice('inverterList') || [];
+  const next = cur.filter((_, i) => i !== idx);
+  globalThis.setStoreSlice('inverterList', next);
   updateInverterListUI();
 }
 
@@ -5927,7 +5955,12 @@ function updateInverterListUI() {
 }
 
 function adjInvQty(idx, d) {
-  _inverterList[idx].qty = Math.max(1, _inverterList[idx].qty + d);
+  // AP-17c: route writes through store.
+  const cur = globalThis.getStoreSlice('inverterList') || [];
+  const next = cur.map((inv, i) =>
+    i === idx ? Object.assign({}, inv, { qty: Math.max(1, inv.qty + d) }) : inv
+  );
+  globalThis.setStoreSlice('inverterList', next);
   updateInverterListUI();
 }
 

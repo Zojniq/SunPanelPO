@@ -89,7 +89,11 @@ let metricSnapM       = 0;        // 0 = off, altrimenti passo in metri
 
 // ── Parco inverter ───────────────────────────────────────────────────
 /** [{key, brand, model, pac, mppt, vMin, vMax, iMax, vocMax, ac, qty}] */
-let _inverterList = [];
+// _inverterList — ownership migrated to store.js (AP-17c). The identifier
+// remains available as a globalThis getter/setter bridge defined there;
+// reads resolve to getStoreSlice('inverterList'), assignments route to
+// setStoreSlice('inverterList', …). In-place array mutations are
+// discouraged — use setStoreSlice with a rebuilt array.
 
 // ── Modulo selezionato dalla libreria ────────────────────────────────
 let _modulePresetKey = null;  // indice in MODULE_PRESETS, o null se personalizzato

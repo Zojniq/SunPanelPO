@@ -261,10 +261,17 @@ function addInverterToList() {
   if (!p) return;
   const qty = Math.max(1, parseInt(qtyEl.value) || 1);
 
-  // Se esiste già lo stesso modello, incrementa la quantità
-  const existing = _inverterList.find(i => i.key === sel.value);
-  if (existing) { existing.qty += qty; }
-  else { _inverterList.push({ key: sel.value, ...p, qty }); }
+  // AP-17c: route writes through store. Rebuild list so subscribers see a
+  // fresh reference and avoid in-place mutation as a side channel.
+  const cur = globalThis.getStoreSlice('inverterList') || [];
+  const existing = cur.find(i => i.key === sel.value);
+  let next;
+  if (existing) {
+    next = cur.map(i => i === existing ? Object.assign({}, i, { qty: i.qty + qty }) : i);
+  } else {
+    next = cur.concat([{ key: sel.value, ...p, qty }]);
+  }
+  globalThis.setStoreSlice('inverterList', next);
 
   sel.value = '';
   qtyEl.value = 1;
@@ -272,7 +279,10 @@ function addInverterToList() {
 }
 
 function removeInverterFromList(idx) {
-  _inverterList.splice(idx, 1);
+  // AP-17c: route writes through store.
+  const cur = globalThis.getStoreSlice('inverterList') || [];
+  const next = cur.filter((_, i) => i !== idx);
+  globalThis.setStoreSlice('inverterList', next);
   updateInverterListUI();
 }
 
@@ -343,7 +353,12 @@ function updateInverterListUI() {
 }
 
 function adjInvQty(idx, d) {
-  _inverterList[idx].qty = Math.max(1, _inverterList[idx].qty + d);
+  // AP-17c: route writes through store.
+  const cur = globalThis.getStoreSlice('inverterList') || [];
+  const next = cur.map((inv, i) =>
+    i === idx ? Object.assign({}, inv, { qty: Math.max(1, inv.qty + d) }) : inv
+  );
+  globalThis.setStoreSlice('inverterList', next);
   updateInverterListUI();
 }
 

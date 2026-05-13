@@ -18,7 +18,7 @@
 'use strict';
 
 let _state = {
-  inverterList: null,
+  inverterList: [],
   installableAreas: null,
   exclusionAreas: null,
   technicalObjects: null,
@@ -62,3 +62,17 @@ function setStoreSlice(key, value) {
   patch[key] = value;
   return setState(patch);
 }
+
+// ── AP-17c — `_inverterList` compatibility bridge ────────────────────────────
+// `_inverterList` ownership is migrated to store.inverterList. Legacy callers
+// still reference the bare identifier; the bridge below resolves reads to the
+// current store slice and routes assignments through setStoreSlice. New write
+// paths should call setStoreSlice('inverterList', nextList) directly.
+try {
+  Object.defineProperty(globalThis, '_inverterList', {
+    configurable: true,
+    enumerable: true,
+    get() { return _state.inverterList; },
+    set(v) { setStoreSlice('inverterList', v); }
+  });
+} catch (_e) { /* property already defined or environment forbids; ignore */ }
