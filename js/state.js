@@ -5,16 +5,15 @@
 // ── Rendering canvas ─────────────────────────────────────────────────
 let canvas, ctx;
 let img       = null;   // immagine planimetrica caricata
-let scale     = 1;      // px per metro reale (impostato dalla calibrazione)
-let z         = 1;      // livello di zoom viewport
-let ox        = 0;      // pan offset X (pixel schermo)
-let oy        = 0;      // pan offset Y (pixel schermo)
+// scale / z / ox / oy — ownership migrated to store.js (AP-17i). Bare
+// identifiers remain as globalThis getter/setter bridges defined there.
 let drag      = false;  // true durante pan con tasto medio
 let mx        = 0;      // coordinata mouse precedente X (per delta pan)
 let my        = 0;      // coordinata mouse precedente Y
 
 // ── Modalità corrente ────────────────────────────────────────────────
-let mode          = 'none';  // 'none'|'cal'|'area'|'tech'
+// mode — ownership migrated to store.js (AP-17h). Bare identifier remains
+// as a globalThis getter/setter bridge defined there.
 let middleDrag    = false;
 
 // ── Calibrazione ────────────────────────────────────────────────────
@@ -48,7 +47,7 @@ let _techRotDragStartAng= 0;      // angolo all'inizio del drag
 
 // ── Disegno area in corso ────────────────────────────────────────────
 let curPts      = [];    // vertici del poligono in costruzione
-let curAreaType = null;  // 'installable' | 'exclusion'
+// curAreaType — ownership migrated to store.js (AP-17h).
 
 // ── Modalità freccia esposizione ─────────────────────────────────────
 let _expArrowMode    = false;
@@ -66,7 +65,7 @@ let paintMode      = false;       // modalità assegna-stringa col click
 let paintStringIdx = 0;           // indice in strings[] della stringa da usare
 let justDoubleClicked = false;    // debounce doppio click
 let selectedPanels = new Set();   // indici pannelli selezionati
-let moveMode       = false;       // true in modalità sposta pannelli
+// moveMode — ownership migrated to store.js (AP-17h).
 let isDraggingPanels  = false;
 let dragStartPoint    = null;
 let panelsStartPos    = [];       // posizioni pannelli prima del drag
@@ -75,11 +74,9 @@ let snapPreviewPos    = null;     // posizione snap magnetico durante drag
 // ── Stringhe & UI ────────────────────────────────────────────────────
 let editingStringIdx  = null;
 let selectedColor     = null;
-let panelOrientation  = 'auto';   // 'auto' | 'portrait' | 'landscape'
-let walkwaysEnabled   = false;
-let snapEnabled       = true;   // snap magnetico attivo
-let orthoEnabled      = true;   // snap ortogonale durante disegno aree
-let _copyExclMode     = false;  // modalità incolla area non installabile
+// panelOrientation / walkwaysEnabled / snapEnabled / orthoEnabled /
+// _copyExclMode — ownership migrated to store.js (AP-17h+i). Bare
+// identifiers remain as globalThis getter/setter bridges defined there.
 let _copyExclPts      = null;   // punti (relativi al centroide) dell'area copiata
 let showBuffer        = false;  // visualizza buffer distanza attorno alle zone di esclusione
 let stringsVisible    = true;   // mostra colori stringhe su pannelli
@@ -87,7 +84,7 @@ let orthoPreviewPt    = null;     // punto snap orto preview
 let _highlightInvIdx  = -1;       // -1 = tutti, 0+ = indice 0-based inverter evidenziato
 
 // ── Vertex editing ───────────────────────────────────────────────────
-let vertexEditMode    = false;    // true = modalità modifica vertici attiva
+// vertexEditMode — ownership migrated to store.js (AP-17h).
 let _vtxDragging      = false;    // true durante drag di un vertice
 let _vtxAreaType      = null;     // 'installable' | 'exclusion'
 let _vtxAreaIdx       = -1;       // indice area in modifica

@@ -24,8 +24,21 @@ let _state = {
   technicalObjects: [],
   panels: [],
   strings: [],
-  ui: {},
-  viewport: {}
+  // AP-17h — UI flag slices (flat primitives, individual bridges below).
+  mode: 'none',
+  curAreaType: null,
+  moveMode: false,
+  vertexEditMode: false,
+  snapEnabled: true,
+  orthoEnabled: true,
+  walkwaysEnabled: false,
+  _copyExclMode: false,
+  // AP-17i — viewport slices (flat primitives, individual bridges below).
+  z: 1,
+  ox: 0,
+  oy: 0,
+  scale: 1,
+  panelOrientation: 'auto'
 };
 
 const _listeners = [];
@@ -146,3 +159,24 @@ try {
     set(v) { setStoreSlice('strings', v); }
   });
 } catch (_e) { /* ignore */ }
+
+// ── AP-17h+i — UI flag and viewport compatibility bridges ────────────────────
+// Temporary AP-17h+i bridges. Each primitive slice is exposed as a global
+// property: reads resolve to `_state[key]`, assignments (e.g. `mode = 'area'`,
+// `snapEnabled = !snapEnabled`) route through `setStoreSlice(key, value)` so
+// every write goes through the store. Defined in a single loop to keep the
+// surface compact.
+[
+  'mode', 'curAreaType', 'moveMode', 'vertexEditMode',
+  'snapEnabled', 'orthoEnabled', 'walkwaysEnabled', '_copyExclMode',
+  'z', 'ox', 'oy', 'scale', 'panelOrientation'
+].forEach(function (key) {
+  try {
+    Object.defineProperty(globalThis, key, {
+      configurable: true,
+      enumerable: true,
+      get() { return _state[key]; },
+      set(v) { setStoreSlice(key, v); }
+    });
+  } catch (_e) { /* ignore */ }
+});
