@@ -334,12 +334,12 @@ function setAreaOrientation(areaIdx, orient) {
     snapshot();
     const mWbase=Math.max(0.1,parseFloat(DOM.pw.value)||1);
     const mHbase=Math.max(0.1,parseFloat(DOM.pl.value)||1.7);
-    panels = panels.filter(p => p.areaIdx !== areaIdx);
     const area = installableAreas[areaIdx];
     area.orientation = orient; // aggiorna prima di chiamare il layout
     const fn = _isConcavePolygon(area.points) ? layoutConcaveArea : _layoutBestOrientation;
     const newPanels = filterIsolatedPanels(fn(area, areaIdx, mWbase, mHbase, 999999));
-    panels.push(...newPanels);
+    // AP-17f: combined filter+append commit through store.
+    globalThis.setStoreSlice('panels', panels.filter(p => p.areaIdx !== areaIdx).concat(newPanels));
     if (strings.length > 0) {
       showToast('Orientamento cambiato. Rigenera le stringhe se necessario.', 'warn', 4000);
     }

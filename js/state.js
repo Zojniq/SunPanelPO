@@ -30,7 +30,10 @@ let calPts = [];  // [pt1, pt2] punti di calibrazione (world coords)
  *  type: 'chimney' | 'antenna' | 'hvac' | 'skylight' | 'exhaust' */
 // technicalObjects — ownership migrated to store.js (AP-17e). Bare identifier
 // remains as a globalThis getter/setter bridge defined in store.js.
-let panels  = [];            // pannelli posizionati
+// panels — ownership migrated to store.js (AP-17f). Bare identifier remains
+// as a globalThis getter/setter bridge defined in store.js. Element property
+// mutations (e.g. `panels[i].strId = ...`) still work through the bridge
+// getter and will be addressed in a later element-API hardening step.
 let strings = [];            // stringhe inverter [{id, name, color, panels[]}]
 
 // ── Stato oggetti tecnici ────────────────────────────────────────────

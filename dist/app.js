@@ -181,7 +181,10 @@ let calPts = [];  // [pt1, pt2] punti di calibrazione (world coords)
  *  type: 'chimney' | 'antenna' | 'hvac' | 'skylight' | 'exhaust' */
 // technicalObjects — ownership migrated to store.js (AP-17e). Bare identifier
 // remains as a globalThis getter/setter bridge defined in store.js.
-let panels  = [];            // pannelli posizionati
+// panels — ownership migrated to store.js (AP-17f). Bare identifier remains
+// as a globalThis getter/setter bridge defined in store.js. Element property
+// mutations (e.g. `panels[i].strId = ...`) still work through the bridge
+// getter and will be addressed in a later element-API hardening step.
 let strings = [];            // stringhe inverter [{id, name, color, panels[]}]
 
 // ── Stato oggetti tecnici ────────────────────────────────────────────
@@ -355,7 +358,7 @@ let _state = {
   installableAreas: [],
   exclusionAreas: [],
   technicalObjects: [],
-  panels: null,
+  panels: [],
   strings: null,
   ui: {},
   viewport: {}
@@ -447,6 +450,21 @@ try {
     enumerable: true,
     get() { return _state.technicalObjects; },
     set(v) { setStoreSlice('technicalObjects', v); }
+  });
+} catch (_e) { /* ignore */ }
+
+// ── AP-17f — `panels` compatibility bridge ───────────────────────────────────
+// Temporary AP-17f bridge. Ownership of placed-panel slice lives in the
+// store; reads resolve to `_state.panels`, assignments route to
+// `setStoreSlice('panels', …)`. Element property writes (strId, stringColor,
+// drag state, etc.) still flow through the getter and are deferred for a
+// later element-level hardening step.
+try {
+  Object.defineProperty(globalThis, 'panels', {
+    configurable: true,
+    enumerable: true,
+    get() { return _state.panels; },
+    set(v) { setStoreSlice('panels', v); }
   });
 } catch (_e) { /* ignore */ }
 
@@ -3237,15 +3255,18 @@ function engineeringLayout(target) {
   const mWbase = Math.max(0.1, parseFloat(DOM.pw.value) || 1);
   const mHbase = Math.max(0.1, parseFloat(DOM.pl.value) || 1.7);
   let totalPlaced = 0;
+  // AP-17f: accumulate locally, then commit once through the store.
+  const _next = [];
   installableAreas.forEach((area, areaIdx) => {
     const remaining = target - totalPlaced;
     if (remaining <= 0) return;
     // Usa layout concavo per aree con vertici reflex, diretto altrimenti
     const fn = _isConcavePolygon(area.points) ? layoutConcaveArea : _layoutBestOrientation;
     const bestResult = fn(area, areaIdx, mWbase, mHbase, remaining);
-    panels.push(...bestResult);
+    _next.push(...bestResult);
     totalPlaced += bestResult.length;
   });
+  globalThis.setStoreSlice('panels', _next);
   installableAreas.forEach((_, areaIdx) => _recomputeAreaWalkways(areaIdx));
   // UI completa — uguale a deleteAllPanels per coerenza visiva
   updateAreaLists(); updateStats(); updateStringList(); updateLegend();
@@ -3408,8 +3429,8 @@ function deleteAllPanels() {
 function deleteSelectedPanels() {
   if (selectedPanels.size === 0) return;
   snapshot();
-  const sorted = [...selectedPanels].sort((a, b) => b - a);
-  sorted.forEach(idx => panels.splice(idx, 1));
+  // AP-17f: rebuild and commit through store.
+  globalThis.setStoreSlice('panels', panels.filter((_, idx) => !selectedPanels.has(idx)));
   // Aggiorna riferimenti stringa: rimuovi pannelli orfani
   strings.forEach(str => {
     str.panels = str.panels.filter(sp =>
@@ -3579,12 +3600,12 @@ function _relayoutArea(idx) {
   // ── 3. Relayout pannelli dell'area ──────────────────────────────────────────
   const mWbase = Math.max(0.1, parseFloat(DOM.pw.value) || 1);
   const mHbase = Math.max(0.1, parseFloat(DOM.pl.value) || 1.7);
-  panels = panels.filter(p => p.areaIdx !== idx);
   const area = installableAreas[idx];
   const maxC = (area.maxPanels != null) ? area.maxPanels : 999999;
   const fn = _isConcavePolygon(area.points) ? layoutConcaveArea : _layoutBestOrientation;
   const newPanels = fn(area, idx, mWbase, mHbase, maxC);
-  panels.push(...newPanels);
+  // AP-17f: combined filter+append commit through store.
+  globalThis.setStoreSlice('panels', panels.filter(p => p.areaIdx !== idx).concat(newPanels));
 
   // ── 4. Ripristina selezioni stabili con nuovi indici ────────────────────────
   panels.forEach((p, i) => {
@@ -9757,12 +9778,12 @@ function setAreaOrientation(areaIdx, orient) {
     snapshot();
     const mWbase=Math.max(0.1,parseFloat(DOM.pw.value)||1);
     const mHbase=Math.max(0.1,parseFloat(DOM.pl.value)||1.7);
-    panels = panels.filter(p => p.areaIdx !== areaIdx);
     const area = installableAreas[areaIdx];
     area.orientation = orient; // aggiorna prima di chiamare il layout
     const fn = _isConcavePolygon(area.points) ? layoutConcaveArea : _layoutBestOrientation;
     const newPanels = filterIsolatedPanels(fn(area, areaIdx, mWbase, mHbase, 999999));
-    panels.push(...newPanels);
+    // AP-17f: combined filter+append commit through store.
+    globalThis.setStoreSlice('panels', panels.filter(p => p.areaIdx !== areaIdx).concat(newPanels));
     if (strings.length > 0) {
       showToast('Orientamento cambiato. Rigenera le stringhe se necessario.', 'warn', 4000);
     }
@@ -9825,7 +9846,8 @@ function handleRightClick(e) {
   const panelIdx=findPanelAtPoint(p);
   if (panelIdx>=0) {
     snapshot();
-    panels.splice(panelIdx,1);
+    // AP-17f: route write through store.
+    globalThis.setStoreSlice('panels', panels.filter((_, i) => i !== panelIdx));
     hoveredPanel=-1;
     selectedPanels=new Set([...selectedPanels].filter(i=>i!==panelIdx).map(i=>i>panelIdx?i-1:i));
     updateAreaLists(); updateStats();

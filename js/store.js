@@ -22,7 +22,7 @@ let _state = {
   installableAreas: [],
   exclusionAreas: [],
   technicalObjects: [],
-  panels: null,
+  panels: [],
   strings: null,
   ui: {},
   viewport: {}
@@ -114,5 +114,20 @@ try {
     enumerable: true,
     get() { return _state.technicalObjects; },
     set(v) { setStoreSlice('technicalObjects', v); }
+  });
+} catch (_e) { /* ignore */ }
+
+// ── AP-17f — `panels` compatibility bridge ───────────────────────────────────
+// Temporary AP-17f bridge. Ownership of placed-panel slice lives in the
+// store; reads resolve to `_state.panels`, assignments route to
+// `setStoreSlice('panels', …)`. Element property writes (strId, stringColor,
+// drag state, etc.) still flow through the getter and are deferred for a
+// later element-level hardening step.
+try {
+  Object.defineProperty(globalThis, 'panels', {
+    configurable: true,
+    enumerable: true,
+    get() { return _state.panels; },
+    set(v) { setStoreSlice('panels', v); }
   });
 } catch (_e) { /* ignore */ }

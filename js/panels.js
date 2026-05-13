@@ -1318,15 +1318,18 @@ function engineeringLayout(target) {
   const mWbase = Math.max(0.1, parseFloat(DOM.pw.value) || 1);
   const mHbase = Math.max(0.1, parseFloat(DOM.pl.value) || 1.7);
   let totalPlaced = 0;
+  // AP-17f: accumulate locally, then commit once through the store.
+  const _next = [];
   installableAreas.forEach((area, areaIdx) => {
     const remaining = target - totalPlaced;
     if (remaining <= 0) return;
     // Usa layout concavo per aree con vertici reflex, diretto altrimenti
     const fn = _isConcavePolygon(area.points) ? layoutConcaveArea : _layoutBestOrientation;
     const bestResult = fn(area, areaIdx, mWbase, mHbase, remaining);
-    panels.push(...bestResult);
+    _next.push(...bestResult);
     totalPlaced += bestResult.length;
   });
+  globalThis.setStoreSlice('panels', _next);
   installableAreas.forEach((_, areaIdx) => _recomputeAreaWalkways(areaIdx));
   // UI completa — uguale a deleteAllPanels per coerenza visiva
   updateAreaLists(); updateStats(); updateStringList(); updateLegend();
@@ -1489,8 +1492,8 @@ function deleteAllPanels() {
 function deleteSelectedPanels() {
   if (selectedPanels.size === 0) return;
   snapshot();
-  const sorted = [...selectedPanels].sort((a, b) => b - a);
-  sorted.forEach(idx => panels.splice(idx, 1));
+  // AP-17f: rebuild and commit through store.
+  globalThis.setStoreSlice('panels', panels.filter((_, idx) => !selectedPanels.has(idx)));
   // Aggiorna riferimenti stringa: rimuovi pannelli orfani
   strings.forEach(str => {
     str.panels = str.panels.filter(sp =>
@@ -1660,12 +1663,12 @@ function _relayoutArea(idx) {
   // ── 3. Relayout pannelli dell'area ──────────────────────────────────────────
   const mWbase = Math.max(0.1, parseFloat(DOM.pw.value) || 1);
   const mHbase = Math.max(0.1, parseFloat(DOM.pl.value) || 1.7);
-  panels = panels.filter(p => p.areaIdx !== idx);
   const area = installableAreas[idx];
   const maxC = (area.maxPanels != null) ? area.maxPanels : 999999;
   const fn = _isConcavePolygon(area.points) ? layoutConcaveArea : _layoutBestOrientation;
   const newPanels = fn(area, idx, mWbase, mHbase, maxC);
-  panels.push(...newPanels);
+  // AP-17f: combined filter+append commit through store.
+  globalThis.setStoreSlice('panels', panels.filter(p => p.areaIdx !== idx).concat(newPanels));
 
   // ── 4. Ripristina selezioni stabili con nuovi indici ────────────────────────
   panels.forEach((p, i) => {

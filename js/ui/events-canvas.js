@@ -15,7 +15,8 @@ function handleRightClick(e) {
   const panelIdx=findPanelAtPoint(p);
   if (panelIdx>=0) {
     snapshot();
-    panels.splice(panelIdx,1);
+    // AP-17f: route write through store.
+    globalThis.setStoreSlice('panels', panels.filter((_, i) => i !== panelIdx));
     hoveredPanel=-1;
     selectedPanels=new Set([...selectedPanels].filter(i=>i!==panelIdx).map(i=>i>panelIdx?i-1:i));
     updateAreaLists(); updateStats();
