@@ -34,6 +34,7 @@ const SOURCES = [
   'js/ui/widgets-module.js',
   'js/ui/widgets-area.js',
   'js/ui/widgets-tech.js',
+  'js/ui/dialogs.js',
   'js/ui.js',
 ];
 
