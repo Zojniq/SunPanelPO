@@ -40,7 +40,8 @@ function placeTechObject(worldPt) {
   const sizePx = sizem * scale;
   snapshot();
   invalidateLayoutCache();
-  technicalObjects.push({
+  // AP-17e: route write through store.
+  globalThis.setStoreSlice('technicalObjects', technicalObjects.concat([{
     type: _techMode,
     x: worldPt.x, y: worldPt.y,
     sizePx: sizePx, sizem: sizem,
@@ -48,7 +49,7 @@ function placeTechObject(worldPt) {
     label: TECH_LABELS[_techMode],
     ang: 0,
     solarAngleDeg: _techMode === 'chimney' ? 30 : undefined
-  });
+  }]));
   updateTechList();
   if (panels.length > 0) _relayout(); else draw();
   selectTechObject(technicalObjects.length - 1);
@@ -57,7 +58,8 @@ function placeTechObject(worldPt) {
 function delTechObject(i) {
   snapshot();
   invalidateLayoutCache();
-  technicalObjects.splice(i, 1);
+  // AP-17e: route write through store.
+  globalThis.setStoreSlice('technicalObjects', technicalObjects.filter((_, idx) => idx !== i));
   if (_selectedTechIdx === i) deselectTechObject();
   else if (_selectedTechIdx > i) _selectedTechIdx--;
   updateTechList();

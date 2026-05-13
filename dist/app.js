@@ -179,7 +179,8 @@ let calPts = [];  // [pt1, pt2] punti di calibrazione (world coords)
 // permitted until a later AP-17 step hardens element access.
 /** Ostacoli puntuali: {type, x, y, sizePx, sizem, bufferM, label, ang}
  *  type: 'chimney' | 'antenna' | 'hvac' | 'skylight' | 'exhaust' */
-let technicalObjects = [];
+// technicalObjects — ownership migrated to store.js (AP-17e). Bare identifier
+// remains as a globalThis getter/setter bridge defined in store.js.
 let panels  = [];            // pannelli posizionati
 let strings = [];            // stringhe inverter [{id, name, color, panels[]}]
 
@@ -353,7 +354,7 @@ let _state = {
   inverterList: [],
   installableAreas: [],
   exclusionAreas: [],
-  technicalObjects: null,
+  technicalObjects: [],
   panels: null,
   strings: null,
   ui: {},
@@ -431,6 +432,21 @@ try {
     enumerable: true,
     get() { return _state.exclusionAreas; },
     set(v) { setStoreSlice('exclusionAreas', v); }
+  });
+} catch (_e) { /* ignore */ }
+
+// ── AP-17e — `technicalObjects` compatibility bridge ─────────────────────────
+// Temporary AP-17e bridge. Ownership of tech-obstacle slice lives in the
+// store; reads resolve to `_state.technicalObjects`, assignments route to
+// `setStoreSlice('technicalObjects', …)`. In-place element property writes
+// (e.g. `technicalObjects[i].ang = …`) still work transparently and will be
+// addressed in a later element-API hardening step.
+try {
+  Object.defineProperty(globalThis, 'technicalObjects', {
+    configurable: true,
+    enumerable: true,
+    get() { return _state.technicalObjects; },
+    set(v) { setStoreSlice('technicalObjects', v); }
   });
 } catch (_e) { /* ignore */ }
 
@@ -9076,7 +9092,8 @@ function placeTechObject(worldPt) {
   const sizePx = sizem * scale;
   snapshot();
   invalidateLayoutCache();
-  technicalObjects.push({
+  // AP-17e: route write through store.
+  globalThis.setStoreSlice('technicalObjects', technicalObjects.concat([{
     type: _techMode,
     x: worldPt.x, y: worldPt.y,
     sizePx: sizePx, sizem: sizem,
@@ -9084,7 +9101,7 @@ function placeTechObject(worldPt) {
     label: TECH_LABELS[_techMode],
     ang: 0,
     solarAngleDeg: _techMode === 'chimney' ? 30 : undefined
-  });
+  }]));
   updateTechList();
   if (panels.length > 0) _relayout(); else draw();
   selectTechObject(technicalObjects.length - 1);
@@ -9093,7 +9110,8 @@ function placeTechObject(worldPt) {
 function delTechObject(i) {
   snapshot();
   invalidateLayoutCache();
-  technicalObjects.splice(i, 1);
+  // AP-17e: route write through store.
+  globalThis.setStoreSlice('technicalObjects', technicalObjects.filter((_, idx) => idx !== i));
   if (_selectedTechIdx === i) deselectTechObject();
   else if (_selectedTechIdx > i) _selectedTechIdx--;
   updateTechList();

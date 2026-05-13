@@ -21,7 +21,7 @@ let _state = {
   inverterList: [],
   installableAreas: [],
   exclusionAreas: [],
-  technicalObjects: null,
+  technicalObjects: [],
   panels: null,
   strings: null,
   ui: {},
@@ -99,5 +99,20 @@ try {
     enumerable: true,
     get() { return _state.exclusionAreas; },
     set(v) { setStoreSlice('exclusionAreas', v); }
+  });
+} catch (_e) { /* ignore */ }
+
+// ── AP-17e — `technicalObjects` compatibility bridge ─────────────────────────
+// Temporary AP-17e bridge. Ownership of tech-obstacle slice lives in the
+// store; reads resolve to `_state.technicalObjects`, assignments route to
+// `setStoreSlice('technicalObjects', …)`. In-place element property writes
+// (e.g. `technicalObjects[i].ang = …`) still work transparently and will be
+// addressed in a later element-API hardening step.
+try {
+  Object.defineProperty(globalThis, 'technicalObjects', {
+    configurable: true,
+    enumerable: true,
+    get() { return _state.technicalObjects; },
+    set(v) { setStoreSlice('technicalObjects', v); }
   });
 } catch (_e) { /* ignore */ }

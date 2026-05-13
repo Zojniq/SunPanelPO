@@ -28,7 +28,8 @@ let calPts = [];  // [pt1, pt2] punti di calibrazione (world coords)
 // permitted until a later AP-17 step hardens element access.
 /** Ostacoli puntuali: {type, x, y, sizePx, sizem, bufferM, label, ang}
  *  type: 'chimney' | 'antenna' | 'hvac' | 'skylight' | 'exhaust' */
-let technicalObjects = [];
+// technicalObjects — ownership migrated to store.js (AP-17e). Bare identifier
+// remains as a globalThis getter/setter bridge defined in store.js.
 let panels  = [];            // pannelli posizionati
 let strings = [];            // stringhe inverter [{id, name, color, panels[]}]
 
