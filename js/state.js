@@ -34,7 +34,11 @@ let calPts = [];  // [pt1, pt2] punti di calibrazione (world coords)
 // as a globalThis getter/setter bridge defined in store.js. Element property
 // mutations (e.g. `panels[i].strId = ...`) still work through the bridge
 // getter and will be addressed in a later element-API hardening step.
-let strings = [];            // stringhe inverter [{id, name, color, panels[]}]
+// strings — ownership migrated to store.js (AP-17g). Bare identifier remains
+// as a globalThis getter/setter bridge defined in store.js. Nested property
+// mutations on individual string objects (s.id, s.name, s.color, s.panels)
+// still work through the bridge getter and will be addressed in a later
+// element-API hardening step.
 
 // ── Stato oggetti tecnici ────────────────────────────────────────────
 let _techMode           = null;   // tipo in fase di piazzamento, o null

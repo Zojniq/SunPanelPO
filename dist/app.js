@@ -185,7 +185,11 @@ let calPts = [];  // [pt1, pt2] punti di calibrazione (world coords)
 // as a globalThis getter/setter bridge defined in store.js. Element property
 // mutations (e.g. `panels[i].strId = ...`) still work through the bridge
 // getter and will be addressed in a later element-API hardening step.
-let strings = [];            // stringhe inverter [{id, name, color, panels[]}]
+// strings — ownership migrated to store.js (AP-17g). Bare identifier remains
+// as a globalThis getter/setter bridge defined in store.js. Nested property
+// mutations on individual string objects (s.id, s.name, s.color, s.panels)
+// still work through the bridge getter and will be addressed in a later
+// element-API hardening step.
 
 // ── Stato oggetti tecnici ────────────────────────────────────────────
 let _techMode           = null;   // tipo in fase di piazzamento, o null
@@ -359,7 +363,7 @@ let _state = {
   exclusionAreas: [],
   technicalObjects: [],
   panels: [],
-  strings: null,
+  strings: [],
   ui: {},
   viewport: {}
 };
@@ -465,6 +469,21 @@ try {
     enumerable: true,
     get() { return _state.panels; },
     set(v) { setStoreSlice('panels', v); }
+  });
+} catch (_e) { /* ignore */ }
+
+// ── AP-17g — `strings` compatibility bridge ──────────────────────────────────
+// Temporary AP-17g bridge. Ownership of string-assignment slice lives in the
+// store; reads resolve to `_state.strings`, assignments route to
+// `setStoreSlice('strings', …)`. Nested property writes on individual string
+// objects (e.g. `strings[i].name = …`, `s.panels.push(...)`) still flow
+// through the getter and are deferred to a later element-level hardening.
+try {
+  Object.defineProperty(globalThis, 'strings', {
+    configurable: true,
+    enumerable: true,
+    get() { return _state.strings; },
+    set(v) { setStoreSlice('strings', v); }
   });
 } catch (_e) { /* ignore */ }
 
@@ -4293,7 +4312,9 @@ function genStrings(numStrings, offset) {
     for (let i = 0; i < numStrings; i++) counts.push(base + (i < resto ? 1 : 0));
   }
 
+  // AP-17g: accumulate locally, then commit once through the store.
   let cursor = 0;
+  const _added = [];
   for (let i = 0; i < numStrings; i++) {
     const cnt   = counts[i] || 0;
     const num   = offset + i + 1;
@@ -4302,8 +4323,9 @@ function genStrings(numStrings, offset) {
     cursor += cnt;
     if (!slice.length) continue;
     slice.forEach(p => { p.strId = 'S' + num; p.stringColor = color; });
-    strings.push({ id: 'S' + num, name: 'Stringa ' + num, color, panels: slice });
+    _added.push({ id: 'S' + num, name: 'Stringa ' + num, color, panels: slice });
   }
+  if (_added.length) globalThis.setStoreSlice('strings', strings.concat(_added));
   _assignInverterMeta();
   updateStringList(); updateLegend(); draw();
 }
@@ -4507,7 +4529,8 @@ function deleteString(idx) {
   _sdpConfirm(`Eliminare ${strings[idx].name}?`, () => {
     snapshot();
     strings[idx].panels.forEach(p => { p.strId = null; p.stringColor = null; });
-    strings.splice(idx, 1);
+    // AP-17g: route write through store.
+    globalThis.setStoreSlice('strings', strings.filter((_, i) => i !== idx));
     strings.forEach((s, i) => { s.id = 'S' + (i + 1); s.name = 'Stringa ' + (i + 1); s.panels.forEach(p => { p.strId = s.id; }); });
     updateStringList(); updateLegend(); updateStats(); draw();
   });

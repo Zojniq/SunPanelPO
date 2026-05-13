@@ -23,7 +23,7 @@ let _state = {
   exclusionAreas: [],
   technicalObjects: [],
   panels: [],
-  strings: null,
+  strings: [],
   ui: {},
   viewport: {}
 };
@@ -129,5 +129,20 @@ try {
     enumerable: true,
     get() { return _state.panels; },
     set(v) { setStoreSlice('panels', v); }
+  });
+} catch (_e) { /* ignore */ }
+
+// ── AP-17g — `strings` compatibility bridge ──────────────────────────────────
+// Temporary AP-17g bridge. Ownership of string-assignment slice lives in the
+// store; reads resolve to `_state.strings`, assignments route to
+// `setStoreSlice('strings', …)`. Nested property writes on individual string
+// objects (e.g. `strings[i].name = …`, `s.panels.push(...)`) still flow
+// through the getter and are deferred to a later element-level hardening.
+try {
+  Object.defineProperty(globalThis, 'strings', {
+    configurable: true,
+    enumerable: true,
+    get() { return _state.strings; },
+    set(v) { setStoreSlice('strings', v); }
   });
 } catch (_e) { /* ignore */ }
