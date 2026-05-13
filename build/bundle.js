@@ -18,6 +18,7 @@ const SOURCES = [
   'data/inverters.data.js',
   'js/config.js',
   'js/state.js',
+  'js/store.js',
   'js/storage.js',
   'js/canvas.js',
   'js/panels.js',
