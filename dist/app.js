@@ -281,7 +281,8 @@ let _previewDebounceTimer = null;
 let _relayoutTimer = null;
 
 // ── DOM cache ────────────────────────────────────────────────────────
-const DOM = {};
+// Moved to js/dom.js (AP-17b). The `DOM` object and `initDOMCache()`
+// populator live there; this file no longer owns the cache.
 
 // ── Engineering colors (generated) ───────────────────────────────────
 const engineeringColors = (() => {
@@ -385,6 +386,53 @@ function setStoreSlice(key, value) {
   const patch = {};
   patch[key] = value;
   return setState(patch);
+}
+
+
+// ── js/dom.js ──
+// ── js/dom.js — Centralized DOM cache (AP-17b) ──
+// DOM element reference cache extracted from state.js and js/ui/utils.js.
+// Owns the shared `DOM` object and the `initDOMCache()` populator. Callers
+// continue to access cached references via bundle-scope `DOM.<id>` and
+// the populator is still triggered from init() at app startup.
+
+'use strict';
+
+const DOM = {};
+
+function initDOMCache() {
+  [
+    'calStatus','moveBtn','deletePanelsBtn','snapBtn','welcome',
+    'pw','pl','pp','ps','safetyMargin','obstacleDistance',
+    'techSize','techBuffer','techRot','techRotVal','techRotRow','techSizeRow',
+    'fileStatus','exportOverlay','exportLabel','hint',
+    'enableWalkways','walkwaySettings','enableStagger','staggerOffset',
+    'walkwayInterval','walkwayWidth','stringNum','pairNum','panelNum',
+    'areaList','exclusionList','stringList','areaAccordionBar',
+    'areaAccordionSummary','exclusionAccordionBar','exclusionAccordionSummary',
+    'stringsDropdown','stringsDropPanel','stringsDropBtn','stringsDropList',
+    'stringsDropCount','stringsDropFooter','undoBtn','redoBtn',
+    'pmInfo','pmTitle','panelModal','colorModal','dist',
+    'strConfigPanel','strConfigBtn','strConfigArrow',
+    'areaAccordionArrow','exclusionAccordionArrow',
+    'techPlacingInfo','pdfSnapToggle','pdfPageModal',
+    'areaBtn','exclusionBtn','calBtn','compass','themeBtn',
+    'totalP','totalKw','totalA','imgFile','loadProjectInput',
+    'staggerSettings','pdfPageLabel','pdfDpiInfo','pdfThumb',
+    'techHeight','techHeightRow',
+    'stringPreview','stringDivisors','stringConfirmBtn',
+    'colorPicker','colorModalTitle',
+    'editVerticesBtn','snapGridWrap','snapGridInput',
+    'moduleLibBody','moduleLibGrid','moduleLibArrow',
+    'stringsVisBtn', 'distInput', 'distInputVal', 'orthoBtn',
+    'moduleIsc', 'moduleVoc', 'moduleImpp', 'moduleVmpp',
+    'cableMaterial', 'cableSystemAC',
+    'cableLenString', 'cableLenMain', 'cableLenAC', 'cableDropDC', 'cableResults',
+    'invPreset', 'invBrand', 'invModel', 'invPac', 'invVmpptMin', 'invVmpptMax',
+    'invImaxMppt', 'invVocMax', 'invValidation',
+    'invInfo', 'invInfoPac', 'invInfoMppt', 'invInfoAC', 'invInfoVrange', 'invInfoImax', 'invInfoVoc',
+    'numInverters', 'multiInvInfo',
+  ].forEach(id => { DOM[id] = document.getElementById(id); });
 }
 
 
@@ -8511,41 +8559,7 @@ function _sdpPrompt(msg, defaultVal, onOk) {
 }
 
 // ── DOM cache ─────────────────────────────────────────────────────────────────
-
-function initDOMCache() {
-  [
-    'calStatus','moveBtn','deletePanelsBtn','snapBtn','welcome',
-    'pw','pl','pp','ps','safetyMargin','obstacleDistance',
-    'techSize','techBuffer','techRot','techRotVal','techRotRow','techSizeRow',
-    'fileStatus','exportOverlay','exportLabel','hint',
-    'enableWalkways','walkwaySettings','enableStagger','staggerOffset',
-    'walkwayInterval','walkwayWidth','stringNum','pairNum','panelNum',
-    'areaList','exclusionList','stringList','areaAccordionBar',
-    'areaAccordionSummary','exclusionAccordionBar','exclusionAccordionSummary',
-    'stringsDropdown','stringsDropPanel','stringsDropBtn','stringsDropList',
-    'stringsDropCount','stringsDropFooter','undoBtn','redoBtn',
-    'pmInfo','pmTitle','panelModal','colorModal','dist',
-    'strConfigPanel','strConfigBtn','strConfigArrow',
-    'areaAccordionArrow','exclusionAccordionArrow',
-    'techPlacingInfo','pdfSnapToggle','pdfPageModal',
-    'areaBtn','exclusionBtn','calBtn','compass','themeBtn',
-    'totalP','totalKw','totalA','imgFile','loadProjectInput',
-    'staggerSettings','pdfPageLabel','pdfDpiInfo','pdfThumb',
-    'techHeight','techHeightRow',
-    'stringPreview','stringDivisors','stringConfirmBtn',
-    'colorPicker','colorModalTitle',
-    'editVerticesBtn','snapGridWrap','snapGridInput',
-    'moduleLibBody','moduleLibGrid','moduleLibArrow',
-    'stringsVisBtn', 'distInput', 'distInputVal', 'orthoBtn',
-    'moduleIsc', 'moduleVoc', 'moduleImpp', 'moduleVmpp',
-    'cableMaterial', 'cableSystemAC',
-    'cableLenString', 'cableLenMain', 'cableLenAC', 'cableDropDC', 'cableResults',
-    'invPreset', 'invBrand', 'invModel', 'invPac', 'invVmpptMin', 'invVmpptMax',
-    'invImaxMppt', 'invVocMax', 'invValidation',
-    'invInfo', 'invInfoPac', 'invInfoMppt', 'invInfoAC', 'invInfoVrange', 'invInfoImax', 'invInfoVoc',
-    'numInverters', 'multiInvInfo',
-  ].forEach(id => { DOM[id] = document.getElementById(id); });
-}
+// Moved to js/dom.js (AP-17b). `DOM` object and `initDOMCache()` live there.
 
 // ── enable (rimuove classe disabled da una sezione) ──────────────────────────
 

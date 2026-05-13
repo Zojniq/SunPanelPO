@@ -19,6 +19,7 @@ const SOURCES = [
   'js/config.js',
   'js/state.js',
   'js/store.js',
+  'js/dom.js',
   'js/storage.js',
   'js/canvas.js',
   'js/panels.js',

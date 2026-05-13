@@ -130,7 +130,8 @@ let _previewDebounceTimer = null;
 let _relayoutTimer = null;
 
 // ── DOM cache ────────────────────────────────────────────────────────
-const DOM = {};
+// Moved to js/dom.js (AP-17b). The `DOM` object and `initDOMCache()`
+// populator live there; this file no longer owns the cache.
 
 // ── Engineering colors (generated) ───────────────────────────────────
 const engineeringColors = (() => {

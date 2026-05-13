@@ -134,41 +134,7 @@ function _sdpPrompt(msg, defaultVal, onOk) {
 }
 
 // ── DOM cache ─────────────────────────────────────────────────────────────────
-
-function initDOMCache() {
-  [
-    'calStatus','moveBtn','deletePanelsBtn','snapBtn','welcome',
-    'pw','pl','pp','ps','safetyMargin','obstacleDistance',
-    'techSize','techBuffer','techRot','techRotVal','techRotRow','techSizeRow',
-    'fileStatus','exportOverlay','exportLabel','hint',
-    'enableWalkways','walkwaySettings','enableStagger','staggerOffset',
-    'walkwayInterval','walkwayWidth','stringNum','pairNum','panelNum',
-    'areaList','exclusionList','stringList','areaAccordionBar',
-    'areaAccordionSummary','exclusionAccordionBar','exclusionAccordionSummary',
-    'stringsDropdown','stringsDropPanel','stringsDropBtn','stringsDropList',
-    'stringsDropCount','stringsDropFooter','undoBtn','redoBtn',
-    'pmInfo','pmTitle','panelModal','colorModal','dist',
-    'strConfigPanel','strConfigBtn','strConfigArrow',
-    'areaAccordionArrow','exclusionAccordionArrow',
-    'techPlacingInfo','pdfSnapToggle','pdfPageModal',
-    'areaBtn','exclusionBtn','calBtn','compass','themeBtn',
-    'totalP','totalKw','totalA','imgFile','loadProjectInput',
-    'staggerSettings','pdfPageLabel','pdfDpiInfo','pdfThumb',
-    'techHeight','techHeightRow',
-    'stringPreview','stringDivisors','stringConfirmBtn',
-    'colorPicker','colorModalTitle',
-    'editVerticesBtn','snapGridWrap','snapGridInput',
-    'moduleLibBody','moduleLibGrid','moduleLibArrow',
-    'stringsVisBtn', 'distInput', 'distInputVal', 'orthoBtn',
-    'moduleIsc', 'moduleVoc', 'moduleImpp', 'moduleVmpp',
-    'cableMaterial', 'cableSystemAC',
-    'cableLenString', 'cableLenMain', 'cableLenAC', 'cableDropDC', 'cableResults',
-    'invPreset', 'invBrand', 'invModel', 'invPac', 'invVmpptMin', 'invVmpptMax',
-    'invImaxMppt', 'invVocMax', 'invValidation',
-    'invInfo', 'invInfoPac', 'invInfoMppt', 'invInfoAC', 'invInfoVrange', 'invInfoImax', 'invInfoVoc',
-    'numInverters', 'multiInvInfo',
-  ].forEach(id => { DOM[id] = document.getElementById(id); });
-}
+// Moved to js/dom.js (AP-17b). `DOM` object and `initDOMCache()` live there.
 
 // ── enable (rimuove classe disabled da una sezione) ──────────────────────────
 
