@@ -37,6 +37,7 @@ const SOURCES = [
   'js/ui/dialogs.js',
   'js/ui/events-area.js',
   'js/ui/events-canvas.js',
+  'js/ui/init.js',
   'js/ui.js',
 ];
 

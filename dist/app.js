@@ -10140,9 +10140,13 @@ function handleTouchEnd(e) {
 }
 
 
-// ── js/ui.js ──
-// ── ui.js — Interfaccia utente, eventi, inizializzazione ──
-
+// ── js/ui/init.js ──
+// ── js/ui/init.js — UI bootstrap and layout orchestration ──
+// Extracted from ui.js in AP-16c4. Contains app initialization,
+// orientation/layout relayout helpers, layout option refresh wiring,
+// stagger/walkway toggles, and mobile panel orchestration.
+// Calling surface unchanged — all symbols remain available through
+// bundle-scope globals.
 'use strict';
 
 
@@ -10411,7 +10415,14 @@ function _updateMobToggle() {
   btn.style.display = isPhonePortrait ? 'flex' : 'none';
 }
 
-// ── Avvio applicazione ────────────────────────────────────────────────────────
+
+// ── js/ui.js ──
+// ── ui.js — Bootstrap shell (AP-16c4) ──
+// All UI logic has been decomposed into js/ui/*.js modules and is loaded
+// via build/bundle.js. This file now only wires the window.onload hook to
+// init(), which lives in js/ui/init.js.
+
+'use strict';
 
 window.onload = init;
 
